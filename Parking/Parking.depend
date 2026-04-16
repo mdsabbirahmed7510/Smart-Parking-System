@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1773159162 source:c:\users\sabbi\downloads\parking\main.c
+	<stdio.h>
+	<string.h>
+
