@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Parking System</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial;
+        transition: 0.5s;
+        text-align: center;
+    }
+
+    body.day { background: #e2e8f0; color: black; }
+    body.night { background: #0f172a; color: white; }
+
+    input {
+        padding: 10px;
+        width: 200px;
+    }
+
+    button {
+        padding: 10px 15px;
+        margin: 5px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .entry { background: #22c55e; }
+    .exit { background: #ef4444; }
+    .toggle { background: #3b82f6; }
+
+    /* 🚗 Parking */
+    .scene { perspective: 1000px; margin-top: 30px; }
+
+    .parking {
+        width: 350px;
+        height: 300px;
+        margin: auto;
+        position: relative;
+        transform-style: preserve-3d;
+        transform: rotateX(20deg);
+    }
+
+    .slot {
+        width: 100px;
+        height: 60px;
+        border: 2px dashed #999;
+        position: absolute;
+        background: rgba(100,100,100,0.2);
+    }
+
+    .s1 { top: 20px; left: 20px; }
+    .s2 { top: 20px; left: 130px; }
+    .s3 { top: 20px; left: 240px; }
+
+    .car {
+        width: 90px;
+        height: 50px;
+        background: #38bdf8;
+        color: black;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        position: absolute;
+        left: 5px;
+        top: 5px;
+    }
+
+    /* 🚗 Waiting UI */
+    .waiting-box {
+        margin-top: 20px;
+        padding: 10px;
+    }
+
+    .waiting-item {
+        display: inline-block;
+        background: #f59e0b;
+        color: black;
+        padding: 6px 10px;
+        margin: 5px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    /* 📩 SMS */
+    .sms {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #16a34a;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        display: none;
+    }
+</style>
+</head>
+
+<body class="night">
+
+<h1>🚗 Smart Parking System</h1>
+
+<input id="carInput" placeholder="Enter Car Number">
+
+<button class="entry" onclick="carEntry()">Entry</button>
+<button class="exit" onclick="carExit()">Exit</button>
+<button class="toggle" onclick="toggleMode()">🌙 / ☀️</button>
+
+<div class="scene">
+    <div class="parking" id="parking"></div>
+</div>
+
+<h3>⏳ Waiting Queue</h3>
+<div class="waiting-box" id="waitingBox"></div>
+
+<div class="sms" id="smsBox"></div>
+
+<script>
+const MAX = 3;
+let parking = [];
+let waiting = [];
+
+function showSMS(msg) {
+    let box = document.getElementById("smsBox");
+    box.innerText = "📩 " + msg;
+    box.style.display = "block";
+    setTimeout(() => box.style.display = "none", 2500);
+}
+
+function render() {
+    let area = document.getElementById("parking");
+    area.innerHTML = "";
+
+    for(let i = 0; i < MAX; i++) {
+        let slot = document.createElement("div");
+        slot.className = "slot s" + (i+1);
+
+        if(parking[i]) {
+            let car = document.createElement("div");
+            car.className = "car";
+            car.innerText = parking[i];
+            slot.appendChild(car);
+        }
+
+        area.appendChild(slot);
+    }
+
+    renderWaiting(); // 🔥 IMPORTANT FIX
+}
+
+function renderWaiting() {
+    let box = document.getElementById("waitingBox");
+    box.innerHTML = "";
+
+    if(waiting.length === 0) {
+        box.innerHTML = "<p>No waiting cars</p>";
+        return;
+    }
+
+    waiting.forEach(car => {
+        let div = document.createElement("div");
+        div.className = "waiting-item";
+        div.innerText = car;
+        box.appendChild(div);
+    });
+}
+
+function carEntry() {
+    let car = document.getElementById("carInput").value;
+    if(car === "") return alert("Enter car number!");
+
+    if(parking.length >= MAX) {
+        waiting.push(car);
+        showSMS(car + " added to waiting queue");
+    } else {
+        parking.push(car);
+        showSMS(car + " parked successfully");
+    }
+
+    document.getElementById("carInput").value = "";
+    render();
+}
+
+function carExit() {
+    if(parking.length === 0) {
+        alert("Parking empty!");
+        return;
+    }
+
+    let exited = parking.shift();
+
+    showSMS(exited + " exited");
+
+    if(waiting.length > 0) {
+        let moved = waiting.shift();
+        parking.push(moved);
+        showSMS(moved + " moved from waiting");
+    }
+
+    render();
+}
+
+function toggleMode() {
+    document.body.classList.toggle("night");
+    document.body.classList.toggle("day");
+}
+
+render();
+</script>
+
+</body>
+</html>
