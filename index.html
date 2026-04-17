@@ -3,32 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🚗 Smart Parking System | 3D Visualization</title>
+    <title>🚗 Smart Parking System | FIFO Queue Behavior</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Day/Night mode styles with improved text contrast */
-        body.day-mode {
-            background-color: #e0f0ff;
-            color: #1e2a3a;
-        }
-
-        body.night-mode {
-            background-color: #0a0f1c;
-            color: #f0f0f0;
-        }
-
-        /* UI Overlay */
         .ui-container {
             position: absolute;
             top: 20px;
             right: 20px;
-            z-index: 10;
+            z-index: 20;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -39,36 +26,29 @@
             background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(12px);
             border-radius: 24px;
-            padding: 18px 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            padding: 18px 24px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.25);
-            transition: all 0.3s;
-            width: 280px;
-        }
-
-        body.day-mode .control-panel {
-            background: rgba(30, 40, 55, 0.9);
-            border-color: rgba(255,255,255,0.4);
-        }
-
-        body.night-mode .control-panel {
-            background: rgba(10, 15, 30, 0.92);
-            border-color: rgba(100, 150, 200, 0.4);
+            width: 300px;
         }
 
         .panel-title {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: bold;
             margin-bottom: 15px;
             text-align: center;
-            letter-spacing: 1px;
             color: #ffd966;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        body.night-mode .panel-title {
-            color: #ffcc44;
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        .fifo-badge {
+            background: #28a745;
+            color: white;
+            text-align: center;
+            padding: 5px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
 
         button {
@@ -80,10 +60,8 @@
             border-radius: 40px;
             cursor: pointer;
             font-weight: bold;
-            transition: transform 0.1s, background 0.2s;
             width: 100%;
             font-size: 1rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         button:hover {
@@ -95,97 +73,61 @@
             background: #6c757d;
         }
 
-        .mode-toggle:hover {
-            background: #495057;
-        }
-
         .status-cards {
             display: flex;
             gap: 12px;
-            margin-top: 12px;
-            margin-bottom: 8px;
-            justify-content: space-between;
+            margin: 12px 0;
         }
 
         .card {
             background: rgba(0,0,0,0.65);
             border-radius: 18px;
-            padding: 10px 5px;
+            padding: 10px;
             text-align: center;
             flex: 1;
-            font-size: 0.85rem;
+            color: white;
             font-weight: bold;
-            backdrop-filter: blur(4px);
         }
 
-        body.day-mode .card {
-            background: rgba(0,0,0,0.6);
-            color: #ffffff;
+        .card span {
+            font-size: 1.5rem;
+            font-weight: bold;
         }
 
-        body.night-mode .card {
-            background: rgba(0,0,0,0.7);
-            color: #ffefc0;
+        .list-section {
+            margin-top: 12px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin: 8px 0 5px;
+            color: #ffecb3;
         }
 
         .parking-list, .waiting-list {
-            margin-top: 10px;
-            font-size: 0.85rem;
-            max-height: 150px;
-            overflow-y: auto;
-            border-radius: 12px;
-            padding: 5px;
-        }
-
-        body.day-mode .parking-list, body.day-mode .waiting-list {
-            background: rgba(0,0,0,0.4);
-            color: #ffffff;
-        }
-
-        body.night-mode .parking-list, body.night-mode .waiting-list {
             background: rgba(0,0,0,0.5);
-            color: #f5f0e0;
+            border-radius: 12px;
+            padding: 6px;
+            max-height: 130px;
+            overflow-y: auto;
+            font-size: 0.8rem;
         }
 
         .list-item {
             padding: 6px 10px;
             border-bottom: 1px solid rgba(255,255,255,0.2);
-            font-family: 'Courier New', monospace;
-            font-weight: 500;
-        }
-
-        body.night-mode .list-item {
-            border-bottom-color: rgba(200,200,200,0.2);
-            color: #fff2d0;
-        }
-
-        .slot-badge {
-            display: inline-block;
-            width: 28px;
-            font-weight: bold;
-        }
-
-        hr {
-            margin: 10px 0;
-            border-color: rgba(255,255,255,0.25);
-        }
-
-        .section-title {
-            font-weight: bold;
-            margin-top: 8px;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
+            font-family: monospace;
+            color: white;
             display: flex;
-            align-items: center;
-            gap: 6px;
+            justify-content: space-between;
         }
 
-        body.day-mode .section-title {
-            color: #ffecb3;
-        }
-
-        body.night-mode .section-title {
-            color: #ffdd99;
+        .exit-next {
+            background: #ff6b35;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
         }
 
         .sms-alert {
@@ -194,67 +136,47 @@
             left: 20px;
             background: #dc3545;
             color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
+            padding: 10px 18px;
+            border-radius: 40px;
             font-weight: bold;
-            font-size: 0.95rem;
-            z-index: 20;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 30;
             transition: opacity 0.4s;
             pointer-events: none;
-            backdrop-filter: blur(8px);
             font-family: monospace;
-            letter-spacing: 0.5px;
-        }
-
-        /* Scrollbar styling */
-        .parking-list::-webkit-scrollbar, .waiting-list::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .parking-list::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-        }
-
-        .parking-list::-webkit-scrollbar-thumb {
-            background: #ffaa44;
-            border-radius: 10px;
         }
 
         @media (max-width: 700px) {
-            .control-panel { width: 250px; padding: 12px 18px; }
-            .card { font-size: 0.75rem; }
-            button { padding: 8px 12px; font-size: 0.9rem; }
+            .control-panel { width: 260px; padding: 12px 16px; }
         }
     </style>
 </head>
-<body class="day-mode">
+<body>
 
     <div class="ui-container">
         <div class="control-panel">
-            <div class="panel-title">🚗 SMART PARKING SYSTEM</div>
+            <div class="panel-title">🚗 SMART PARKING</div>
+            <div class="fifo-badge">🎯 FIFO MODE: First In, First Out (আগে আসা আগে বের হবে)</div>
             <button id="entryBtn">🚙 CAR ENTRY</button>
             <button id="exitBtn">🚪 CAR EXIT</button>
             <button id="modeToggleBtn" class="mode-toggle">🌙 NIGHT MODE</button>
             
             <div class="status-cards">
-                <div class="card">🅿️ PARKING<br><span id="parkCount" style="font-size:1.4rem; font-weight:bold;">0</span> / <span id="maxPark">3</span></div>
-                <div class="card">⏳ WAITING<br><span id="waitCount" style="font-size:1.4rem; font-weight:bold;">0</span> / <span id="maxWait">10</span></div>
+                <div class="card">🅿️ PARKING<br><span id="parkCount">0</span>/<span id="maxPark">3</span></div>
+                <div class="card">⏳ WAITING<br><span id="waitCount">0</span>/<span id="maxWait">10</span></div>
             </div>
             
-            <hr>
-            <div class="section-title">🅿️ PARKED CARS (LIFO)</div>
-            <div id="parkedListDisplay" class="parking-list">— Empty —</div>
-            
-            <div class="section-title">⏳ WAITING QUEUE (FIFO)</div>
-            <div id="waitingListDisplay" class="waiting-list">— No waiting —</div>
+            <div class="list-section">
+                <div class="section-title">🚘 PARKED CARS (FIFO Order)</div>
+                <div id="parkedListDisplay" class="parking-list">— Empty —</div>
+            </div>
+            <div class="list-section">
+                <div class="section-title">⏱️ WAITING QUEUE</div>
+                <div id="waitingListDisplay" class="waiting-list">— No waiting —</div>
+            </div>
         </div>
     </div>
-    
     <div id="smsAlert" class="sms-alert" style="display: none;">📱 SMS: </div>
 
-    <!-- 3D library -->
     <script type="importmap">
         {
             "imports": {
@@ -267,337 +189,441 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js';
         
-        // ---------- Data Model (same as C code logic) ----------
+        // ========== FIFO QUEUE SYSTEM (First In First Out) ==========
         const MAX_PARK = 3;
         const MAX_WAIT = 10;
-        let parking = [];     // stack (LIFO)
-        let waiting = [];     // queue (FIFO)
+        let parking = [];     // QUEUE: first element will exit first (FIFO)
+        let waiting = [];     // QUEUE: first element will enter parking first
         
-        // Helper: update UI lists & counts & 3D spots
-        function refreshUI() {
-            // update counters
+        // Animation state
+        let isAnimating = false;
+        let activeCarObj = null;
+        let animationStartPos = null;
+        let animationTargetPos = null;
+        let animationProgress = 0;
+        let onCompleteCallback = null;
+        
+        // DOM Elements
+        const parkedDiv = document.getElementById('parkedListDisplay');
+        const waitingDiv = document.getElementById('waitingListDisplay');
+        
+        function updateUI() {
             document.getElementById('parkCount').innerText = parking.length;
             document.getElementById('waitCount').innerText = waiting.length;
-            document.getElementById('maxPark').innerText = MAX_PARK;
-            document.getElementById('maxWait').innerText = MAX_WAIT;
             
-            // parked list display (LIFO order - top of stack last)
-            const parkedDiv = document.getElementById('parkedListDisplay');
+            // Parked cars - show in FIFO order (first in line will exit first)
             if (parking.length === 0) {
-                parkedDiv.innerHTML = '<div style="opacity:0.7; padding:5px;">— Empty —</div>';
+                parkedDiv.innerHTML = '<div style="padding:6px;">— Empty —</div>';
             } else {
                 let html = '';
-                for (let i = parking.length-1; i >= 0; i--) {
-                    html += `<div class="list-item">🚘 ${parking[i]}</div>`;
+                for (let i = 0; i < parking.length; i++) {
+                    const isFirst = (i === 0);
+                    html += `<div class="list-item">
+                                <span>🚘 ${parking[i]}</span>
+                                ${isFirst ? '<span class="exit-next">NEXT TO EXIT</span>' : ''}
+                            </div>`;
                 }
                 parkedDiv.innerHTML = html;
             }
             
-            // waiting list display (FIFO order)
-            const waitDiv = document.getElementById('waitingListDisplay');
+            // Waiting queue
             if (waiting.length === 0) {
-                waitDiv.innerHTML = '<div style="opacity:0.7; padding:5px;">— No waiting —</div>';
+                waitingDiv.innerHTML = '<div style="padding:6px;">— No waiting —</div>';
             } else {
                 let html = '';
                 for (let i = 0; i < waiting.length; i++) {
-                    html += `<div class="list-item">⏳ ${waiting[i]}</div>`;
+                    const isFirst = (i === 0);
+                    html += `<div class="list-item">
+                                <span>⏳ ${waiting[i]}</span>
+                                ${isFirst ? '<span style="color:#ffaa44;">⏩ NEXT TO ENTER</span>' : ''}
+                            </div>`;
                 }
-                waitDiv.innerHTML = html;
+                waitingDiv.innerHTML = html;
             }
-            
-            // Update 3D parking spots
-            update3DParkingSpots();
         }
         
-        // Horn sound (using Web Audio)
+        // Horn sound
         let audioCtx = null;
         function playHornSound() {
             try {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
                 const now = audioCtx.currentTime;
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                osc.frequency.value = 900;
-                gain.gain.setValueAtTime(0.35, now);
-                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+                osc.frequency.value = 950;
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
                 osc.start();
-                osc.stop(now + 0.6);
-            } catch(e) { console.log("Audio:", e); }
+                osc.stop(now + 0.55);
+            } catch(e) { console.log("audio err"); }
         }
         
-        // SMS style notification
-        function showSMS(message) {
+        function showSMS(msg) {
             const smsDiv = document.getElementById('smsAlert');
             smsDiv.style.display = 'block';
-            smsDiv.innerHTML = `📱 SMS: ${message}`;
+            smsDiv.innerHTML = `📱 SMS: ${msg}`;
             smsDiv.style.opacity = '1';
             setTimeout(() => {
                 smsDiv.style.opacity = '0';
-                setTimeout(() => {
-                    smsDiv.style.display = 'none';
-                    smsDiv.style.opacity = '1';
-                }, 500);
-            }, 3200);
+                setTimeout(() => { smsDiv.style.display = 'none'; smsDiv.style.opacity = '1'; }, 500);
+            }, 3000);
         }
         
-        // Car Entry Logic (mirroring C code)
-        function carEntry() {
-            const carNumber = prompt("Enter Car Number (e.g., ABC-1234):");
-            if (!carNumber || carNumber.trim() === "") {
-                alert("Invalid car number!");
-                return;
-            }
-            const trimmedCar = carNumber.trim().toUpperCase();
-            
-            if (parking.length >= MAX_PARK) {
-                // Parking full
-                if (waiting.length >= MAX_WAIT) {
-                    // Waiting queue also full -> reject with horn
-                    playHornSound();
-                    const msg = `⚠️ SYSTEM FULL! Car ${trimmedCar} rejected. Parking & waiting queues are full.`;
-                    alert(msg);
-                    showSMS(msg);
-                } else {
-                    waiting.push(trimmedCar);
-                    const msg = `🅿️ Parking Full! Car ${trimmedCar} added to waiting queue (Position: ${waiting.length}).`;
-                    alert(msg);
-                    showSMS(`🚗 ${trimmedCar} → Waiting queue [${waiting.length}/${MAX_WAIT}]`);
-                }
-            } else {
-                // parking has space
-                parking.push(trimmedCar);
-                const msg = `✅ Car ${trimmedCar} parked successfully. Slot: ${parking.length}/${MAX_PARK}`;
-                alert(msg);
-                showSMS(`🚙 ${trimmedCar} parked.`);
-            }
-            refreshUI();
-        }
-        
-        // Car Exit Logic (LIFO from parking stack)
-        function carExit() {
-            if (parking.length === 0) {
-                alert("Parking Empty! No car to exit.");
-                return;
-            }
-            const exitedCar = parking.pop();
-            const msg = `🚪 Car ${exitedCar} exited from parking.`;
-            alert(msg);
-            showSMS(`${exitedCar} left. Slot freed.`);
-            
-            // Move first waiting car to parking if any
-            if (waiting.length > 0) {
-                const movedCar = waiting.shift();
-                parking.push(movedCar);
-                const moveMsg = `⏩ Waiting car ${movedCar} moved to parking.`;
-                alert(moveMsg);
-                showSMS(`🚗 ${movedCar} moved from waiting → parking.`);
-            }
-            refreshUI();
-        }
-        
-        // ---------- 3D SCENE ----------
+        // ========== 3D SCENE ==========
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(5, 3.8, 6.5);
+        camera.position.set(5.5, 3.8, 7);
         camera.lookAt(0, 0.2, 0);
         
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
         
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.06;
-        controls.autoRotate = false;
-        controls.enableZoom = true;
         controls.target.set(0, 0.5, 0);
         
-        // Enhanced Lighting
+        // Lighting
         const ambientLight = new THREE.AmbientLight(0x404060, 0.65);
         scene.add(ambientLight);
-        
-        const mainLight = new THREE.DirectionalLight(0xfff5e0, 1.2);
-        mainLight.position.set(4, 6, 3);
-        mainLight.castShadow = true;
-        mainLight.receiveShadow = true;
-        mainLight.shadow.mapSize.width = 1024;
-        mainLight.shadow.mapSize.height = 1024;
-        scene.add(mainLight);
-        
-        const fillLight = new THREE.PointLight(0x6688aa, 0.4);
+        const dirLight = new THREE.DirectionalLight(0xfff5e0, 1.2);
+        dirLight.position.set(5, 8, 3);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+        const fillLight = new THREE.PointLight(0x6688aa, 0.3);
         fillLight.position.set(1, 2, 2);
         scene.add(fillLight);
         
-        const backRim = new THREE.PointLight(0xffaa77, 0.3);
-        backRim.position.set(-2, 1.5, -3);
-        scene.add(backRim);
-        
-        const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a3a2a, roughness: 0.65, metalness: 0.05 });
-        const ground = new THREE.Mesh(new THREE.PlaneGeometry(9, 9), groundMat);
-        ground.rotation.x = -Math.PI / 2;
+        // Ground & Road
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a3a2a });
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), groundMat);
+        ground.rotation.x = -Math.PI/2;
         ground.position.y = -0.2;
         ground.receiveShadow = true;
         scene.add(ground);
         
-        const gridHelper = new THREE.GridHelper(10, 22, 0xaaccff, 0x4488aa);
-        gridHelper.position.y = -0.12;
-        scene.add(gridHelper);
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x2c2e3a });
+        const road = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 8), roadMat);
+        road.rotation.x = -Math.PI/2;
+        road.position.set(0, -0.18, -1.2);
+        road.receiveShadow = true;
+        scene.add(road);
         
-        // Parking slots positions
+        // Parking slots (3)
         const slotPositions = [
-            { x: -1.9, z: 1.3, index: 0 },
-            { x: 0, z: 1.3, index: 1 },
-            { x: 1.9, z: 1.3, index: 2 }
+            { x: -1.9, z: 1.4, index: 0 },
+            { x: 0, z: 1.4, index: 1 },
+            { x: 1.9, z: 1.4, index: 2 }
         ];
         
-        let carMeshes = [null, null, null];
+        slotPositions.forEach(slot => {
+            const marker = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.05, 1.9), 
+                new THREE.MeshStandardMaterial({ color: 0x3a6a8a, transparent: true, opacity: 0.5 }));
+            marker.position.set(slot.x, -0.16, slot.z);
+            marker.receiveShadow = true;
+            scene.add(marker);
+            
+            const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(1.2, 0.05, 1.9));
+            const wire = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffaa77 }));
+            wire.position.copy(marker.position);
+            scene.add(wire);
+        });
         
-        function createStylizedCar(colorHex) {
+        let parkedCarMeshes = [null, null, null];
+        
+        function createCarModel(colorHex, posX, posZ) {
             const group = new THREE.Group();
-            // body
-            const bodyGeo = new THREE.BoxGeometry(0.85, 0.32, 1.25);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.7, roughness: 0.25 });
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.32, 1.25), 
+                new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.7 }));
             body.position.y = 0.16;
             body.castShadow = true;
             group.add(body);
-            // roof
-            const roofGeo = new THREE.BoxGeometry(0.65, 0.22, 0.85);
-            const roofMat = new THREE.MeshStandardMaterial({ color: 0x2c2c2c, metalness: 0.3 });
-            const roof = new THREE.Mesh(roofGeo, roofMat);
+            
+            const roof = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.22, 0.85), 
+                new THREE.MeshStandardMaterial({ color: 0x2c2c2c }));
             roof.position.y = 0.42;
             roof.castShadow = true;
             group.add(roof);
-            // windows
-            const windowMat = new THREE.MeshStandardMaterial({ color: 0x88aaff, emissive: 0x112233 });
-            const frontWind = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.12, 0.05), windowMat);
-            frontWind.position.set(0, 0.35, 0.55);
-            group.add(frontWind);
-            // wheels
-            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.85 });
+            
+            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
             const wheelPos = [[-0.55, 0.07, -0.58], [0.55, 0.07, -0.58], [-0.55, 0.07, 0.58], [0.55, 0.07, 0.58]];
             wheelPos.forEach(pos => {
-                const wheelGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.1, 20);
-                const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+                const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.1, 20), wheelMat);
                 wheel.rotation.z = Math.PI/2;
                 wheel.position.set(pos[0], pos[1], pos[2]);
                 wheel.castShadow = true;
                 group.add(wheel);
             });
+            group.position.set(posX, -0.05, posZ);
+            group.rotation.y = Math.PI/2;
             return group;
         }
         
-        // Create parking slot markings
-        slotPositions.forEach((slot) => {
-            const markerMat = new THREE.MeshStandardMaterial({ color: 0x3a6a8a, emissive: 0x112244, transparent: true, opacity: 0.5 });
-            const marker = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.06, 1.9), markerMat);
-            marker.position.set(slot.x, -0.14, slot.z);
-            marker.receiveShadow = true;
-            scene.add(marker);
-            
-            // white border
-            const edgesGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(1.2, 0.06, 1.9));
-            const edgesMat = new THREE.LineBasicMaterial({ color: 0xffdd99 });
-            const wire = new THREE.LineSegments(edgesGeo, edgesMat);
-            wire.position.copy(marker.position);
-            scene.add(wire);
-        });
-        
-        function update3DParkingSpots() {
-            for (let i = 0; i < carMeshes.length; i++) {
-                if (carMeshes[i]) {
-                    scene.remove(carMeshes[i]);
-                    carMeshes[i] = null;
+        function updateParking3D() {
+            for (let i = 0; i < parkedCarMeshes.length; i++) {
+                if (parkedCarMeshes[i]) {
+                    scene.remove(parkedCarMeshes[i]);
+                    parkedCarMeshes[i] = null;
                 }
             }
             for (let i = 0; i < parking.length && i < MAX_PARK; i++) {
                 const slot = slotPositions[i];
-                let hue = (parking[i].length * 37 + parking[i].charCodeAt(0) || 120) % 360;
+                let hue = (parking[i].length * 41 + (parking[i].charCodeAt(0) || 120)) % 360;
                 const carColor = new THREE.Color(`hsl(${hue}, 75%, 58%)`);
-                const carModel = createStylizedCar(carColor.getHex());
-                carModel.position.set(slot.x, -0.08, slot.z);
-                carModel.rotation.y = Math.PI / 2;
-                carModel.castShadow = true;
+                const carModel = createCarModel(carColor.getHex(), slot.x, slot.z);
                 scene.add(carModel);
-                carMeshes[i] = carModel;
+                parkedCarMeshes[i] = carModel;
             }
         }
         
-        // Day/Night mode with improved visibility
+        // Animation points
+        const entryPoint = new THREE.Vector3(-0.5, -0.05, -2.8);
+        const exitPoint = new THREE.Vector3(0.5, -0.05, -3.2);
+        
+        function getSlotPosition(slotIndex) {
+            const slot = slotPositions[slotIndex];
+            return new THREE.Vector3(slot.x, -0.05, slot.z);
+        }
+        
+        function animateCarMovement(startVec, endVec, carColorHex, onFinish) {
+            if (isAnimating) {
+                showSMS("Another car is moving, please wait...");
+                return false;
+            }
+            isAnimating = true;
+            const tempCar = createCarModel(carColorHex, startVec.x, startVec.z);
+            scene.add(tempCar);
+            activeCarObj = tempCar;
+            animationStartPos = startVec.clone();
+            animationTargetPos = endVec.clone();
+            animationProgress = 0;
+            onCompleteCallback = onFinish;
+            return true;
+        }
+        
+        // ========== FIFO CAR ENTRY (Add to end of queue) ==========
+        function carEntry() {
+            if (isAnimating) {
+                alert("Please wait, animation in progress...");
+                return;
+            }
+            const carNumber = prompt("Enter Car Number (e.g., ABC-1234):");
+            if (!carNumber || carNumber.trim() === "") return;
+            const trimmed = carNumber.trim().toUpperCase();
+            
+            if (parking.length >= MAX_PARK) {
+                if (waiting.length >= MAX_WAIT) {
+                    playHornSound();
+                    const msg = `SYSTEM FULL! Car ${trimmed} rejected.`;
+                    alert(msg);
+                    showSMS(msg);
+                    return;
+                } else {
+                    waiting.push(trimmed);
+                    updateUI();
+                    const msg = `Parking Full! ${trimmed} added to waiting queue (${waiting.length}/${MAX_WAIT})`;
+                    alert(msg);
+                    showSMS(msg);
+                    return;
+                }
+            }
+            
+            const targetSlotIdx = parking.length;
+            const targetPos = getSlotPosition(targetSlotIdx);
+            const carColor = new THREE.Color(`hsl(${(trimmed.length * 73) % 360}, 75%, 58%)`);
+            
+            animateCarMovement(entryPoint, targetPos, carColor.getHex(), () => {
+                scene.remove(activeCarObj);
+                activeCarObj = null;
+                parking.push(trimmed);
+                updateParking3D();
+                updateUI();
+                showSMS(`✅ ${trimmed} parked at slot ${targetSlotIdx + 1}`);
+                alert(`Car ${trimmed} entered and parked.`);
+                isAnimating = false;
+            });
+        }
+        
+        // ========== FIFO CAR EXIT (Remove FIRST element - First In First Out) ==========
+        function carExit() {
+            if (isAnimating) {
+                alert("Please wait, animation in progress...");
+                return;
+            }
+            if (parking.length === 0) {
+                alert("Parking is empty!");
+                return;
+            }
+            
+            // FIFO: first element (index 0) exits first
+            const exitingCar = parking[0];
+            const exitingSlotIdx = 0;
+            const startPos = getSlotPosition(exitingSlotIdx);
+            const carColor = new THREE.Color(`hsl(${(exitingCar.length * 73) % 360}, 75%, 58%)`);
+            
+            // Remove the static car mesh
+            if (parkedCarMeshes[exitingSlotIdx]) {
+                scene.remove(parkedCarMeshes[exitingSlotIdx]);
+                parkedCarMeshes[exitingSlotIdx] = null;
+            }
+            
+            // Remove first element from parking array
+            parking.shift();
+            updateUI();
+            
+            animateCarMovement(startPos, exitPoint, carColor.getHex(), () => {
+                scene.remove(activeCarObj);
+                activeCarObj = null;
+                showSMS(`🚪 ${exitingCar} exited (First In First Out)`);
+                alert(`Car ${exitingCar} exited.`);
+                
+                // Shift all remaining cars to correct slots
+                updateParking3D();
+                
+                // Bring waiting car if any
+                if (waiting.length > 0) {
+                    const nextCar = waiting.shift();
+                    updateUI();
+                    const newSlotIdx = parking.length;
+                    const targetPosNew = getSlotPosition(newSlotIdx);
+                    const newColor = new THREE.Color(`hsl(${(nextCar.length * 73) % 360}, 75%, 58%)`);
+                    
+                    animateCarMovement(entryPoint, targetPosNew, newColor.getHex(), () => {
+                        scene.remove(activeCarObj);
+                        activeCarObj = null;
+                        parking.push(nextCar);
+                        updateParking3D();
+                        updateUI();
+                        showSMS(`🚗 ${nextCar} moved from waiting to parking.`);
+                        alert(`Waiting car ${nextCar} has been parked.`);
+                        isAnimating = false;
+                    });
+                } else {
+                    isAnimating = false;
+                }
+            });
+        }
+        
+        // ========== DAY/NIGHT MODE ==========
         let isNight = false;
-        function toggleDayNight() {
-            isNight = !isNight;
-            const body = document.body;
-            if (isNight) {
-                body.classList.remove('day-mode');
-                body.classList.add('night-mode');
-                document.getElementById('modeToggleBtn').innerHTML = "☀️ DAY MODE";
-                mainLight.intensity = 0.35;
-                ambientLight.intensity = 0.35;
-                fillLight.intensity = 0.5;
-                backRim.intensity = 0.45;
-                scene.background = new THREE.Color(0x050b1a);
-                // add subtle blueish fog for night
-                scene.fog = new THREE.FogExp2(0x050b1a, 0.025);
-            } else {
-                body.classList.remove('night-mode');
-                body.classList.add('day-mode');
-                document.getElementById('modeToggleBtn').innerHTML = "🌙 NIGHT MODE";
-                mainLight.intensity = 1.2;
-                ambientLight.intensity = 0.65;
-                fillLight.intensity = 0.4;
-                backRim.intensity = 0.3;
-                scene.background = new THREE.Color(0xc8e4ff);
-                scene.fog = null;
-            }
+        const lampLights = [];
+        
+        function addLampPost(x, z) {
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 1.4), 
+                new THREE.MeshStandardMaterial({ color: 0xaa9988 }));
+            pole.position.set(x, 0.5, z);
+            pole.castShadow = true;
+            scene.add(pole);
+            
+            const lampSphere = new THREE.Mesh(new THREE.SphereGeometry(0.2), 
+                new THREE.MeshStandardMaterial({ color: 0xffdd99, emissive: 0xffaa66 }));
+            lampSphere.position.set(x, 1.2, z);
+            scene.add(lampSphere);
+            
+            const pLight = new THREE.PointLight(0xffaa66, 0);
+            pLight.position.set(x, 1.0, z);
+            pLight.distance = 6;
+            scene.add(pLight);
+            lampLights.push(pLight);
         }
         
-        scene.background = new THREE.Color(0xc8e4ff);
+        addLampPost(-2.2, -1.2);
+        addLampPost(2.2, -1.2);
+        addLampPost(0, 2.5);
         
-        // Decorative trees
         function addTree(x, z) {
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 0.7), new THREE.MeshStandardMaterial({ color: 0x8B5A2B }));
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 0.7), 
+                new THREE.MeshStandardMaterial({ color: 0x8B5A2B }));
             trunk.position.set(x, -0.15, z);
             trunk.castShadow = true;
-            const foliage1 = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.7, 8), new THREE.MeshStandardMaterial({ color: 0x4caf50 }));
-            foliage1.position.set(x, 0.25, z);
-            foliage1.castShadow = true;
-            const foliage2 = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.55, 8), new THREE.MeshStandardMaterial({ color: 0x6fbf4c }));
-            foliage2.position.set(x, 0.65, z);
-            foliage2.castShadow = true;
-            scene.add(trunk, foliage1, foliage2);
+            const foliage = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.8, 8), 
+                new THREE.MeshStandardMaterial({ color: 0x5a9e4e }));
+            foliage.position.set(x, 0.25, z);
+            foliage.castShadow = true;
+            scene.add(trunk, foliage);
         }
-        addTree(-2.5, -1.5);
-        addTree(2.7, -1.5);
-        addTree(-2.2, 2.2);
-        addTree(2.4, 2.3);
+        addTree(-2.8, -1.8);
+        addTree(2.9, -1.9);
+        addTree(-2.5, 2.5);
+        addTree(2.6, 2.6);
         
-        // Light posts
-        const lampMat = new THREE.MeshStandardMaterial({ color: 0xffcc77, emissive: 0x442200 });
-        const addLightPost = (x, z) => {
-            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 1.3), new THREE.MeshStandardMaterial({ color: 0xbbaa88 }));
-            pole.position.set(x, 0.45, z);
-            pole.castShadow = true;
-            const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.2), lampMat);
-            lamp.position.set(x, 1.1, z);
-            scene.add(pole, lamp);
-        };
-        addLightPost(-2.0, -1.8);
-        addLightPost(2.2, -1.8);
-        addLightPost(0, 2.6);
+        // Sun & Moon
+        const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(0.45, 32, 32), 
+            new THREE.MeshStandardMaterial({ color: 0xffaa55, emissive: 0xff4400, emissiveIntensity: 0.8 }));
+        sunMesh.position.set(3, 4.5, -4);
+        scene.add(sunMesh);
         
-        // floating label for 3D (optional)
+        const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), 
+            new THREE.MeshStandardMaterial({ color: 0xccddff, emissive: 0x88aaff, emissiveIntensity: 0.3 }));
+        moonMesh.position.set(3, 4.2, -4);
+        moonMesh.visible = false;
+        scene.add(moonMesh);
+        
+        // Stars
+        const starGeometry = new THREE.BufferGeometry();
+        const starPositions = new Float32Array(800 * 3);
+        for (let i = 0; i < 800; i++) {
+            starPositions[i*3] = (Math.random() - 0.5) * 400;
+            starPositions[i*3+1] = (Math.random() - 0.5) * 100 + 20;
+            starPositions[i*3+2] = (Math.random() - 0.5) * 100 - 80;
+        }
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0xffffff, size: 0.15 }));
+        scene.add(stars);
+        stars.visible = false;
+        
+        function setDayMode() {
+            isNight = false;
+            dirLight.intensity = 1.2;
+            ambientLight.intensity = 0.65;
+            scene.background = new THREE.Color(0xc8e4ff);
+            lampLights.forEach(light => light.intensity = 0);
+            sunMesh.visible = true;
+            moonMesh.visible = false;
+            stars.visible = false;
+            scene.fog = null;
+        }
+        
+        function setNightMode() {
+            isNight = true;
+            dirLight.intensity = 0.2;
+            ambientLight.intensity = 0.28;
+            scene.background = new THREE.Color(0x0a1030);
+            lampLights.forEach(light => light.intensity = 0.9);
+            sunMesh.visible = false;
+            moonMesh.visible = true;
+            stars.visible = true;
+            scene.fog = new THREE.FogExp2(0x0a1030, 0.025);
+        }
+        
+        setDayMode();
+        
+        function toggleDayNight() {
+            if (isNight) setDayMode();
+            else setNightMode();
+            document.getElementById('modeToggleBtn').innerHTML = isNight ? "🌙 NIGHT MODE" : "☀️ DAY MODE";
+        }
+        
+        // Animation loop
         function animate() {
+            if (isAnimating && activeCarObj && animationStartPos && animationTargetPos) {
+                animationProgress += 0.04;
+                if (animationProgress >= 1) {
+                    activeCarObj.position.copy(animationTargetPos);
+                    if (onCompleteCallback) onCompleteCallback();
+                    isAnimating = false;
+                    animationProgress = 0;
+                } else {
+                    const t = Math.sin(animationProgress * Math.PI/2);
+                    const newX = animationStartPos.x + (animationTargetPos.x - animationStartPos.x) * t;
+                    const newZ = animationStartPos.z + (animationTargetPos.z - animationStartPos.z) * t;
+                    activeCarObj.position.set(newX, -0.05, newZ);
+                }
+            }
             controls.update();
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
@@ -610,18 +636,13 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
         
-        // Attach event listeners
-        document.getElementById('entryBtn').addEventListener('click', () => { carEntry(); });
-        document.getElementById('exitBtn').addEventListener('click', () => { carExit(); });
+        document.getElementById('entryBtn').addEventListener('click', carEntry);
+        document.getElementById('exitBtn').addEventListener('click', carExit);
         document.getElementById('modeToggleBtn').addEventListener('click', toggleDayNight);
         
-        refreshUI();
-        
-        setTimeout(() => {
-            showSMS("Smart Parking Active | 3D View | 3 Slots | Waiting Queue 10");
-        }, 800);
-        
-        console.log("3D Smart Parking with High Contrast UI");
+        updateParking3D();
+        updateUI();
+        showSMS("FIFO Mode Active | First In First Out | আগে আসা গাড়ী আগে বের হবে");
     </script>
 </body>
 </html>
